@@ -1,0 +1,10 @@
+(defpackage "MUSIC-PLAYER.TESTS"
+  (:use "COMMON-LISP"))
+
+(defpackage "MUSIC-PLAYER.CONTROLLER.TESTS"
+  (:use "COMMON-LISP"
+	"LISP-UNIT"))
+
+(defpackage "MUSIC-PLAYER.CODEC.TESTS"
+  (:use "COMMON-LISP"
+	"LISP-UNIT"))
