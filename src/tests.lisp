@@ -65,14 +65,14 @@ object of type TEST-RESULTS."
 	(t
 	 (format stream "~d tests" d))))))
 
-;;; - PACKAGE-TEST-CONTAINER
-(defun package-test-container-p (object)
+;;; - TEST-PACKAGE
+(defun test-package-p (object)
   (or (and (stringp object)
 	   (find-package object))
       (packagep object)))
 
-(deftype package-test-container ()
-  `(satisfies package-test-container-p))
+(deftype test-package ()
+  `(satisfies test-package-p))
 
 (defun canonical-package (package-designator)
   (etypecase package-designator
@@ -116,7 +116,7 @@ object of type TEST-RESULTS."
 ;;; - CONTAINER INTERFACE
 (deftype test-container ()
   `(or simple-test-container
-       package-test-container))
+       test-package))
 
 (defun ninsert-test (container test)
   (check-type test test)
@@ -127,7 +127,7 @@ object of type TEST-RESULTS."
 	 (if position
 	     (setf (elt container position) test)
 	     (vector-push-extend test container)))))
-    (package-test-container
+    (test-package
      (ninsert-test (print (container-for-package container)) test)))
   container)
 
@@ -141,21 +141,21 @@ object of type TEST-RESULTS."
 	  (setf container (delete test container)))
 	 ((and symbol (not null))
 	  (setf container (delete test container :key #'test-name))))))
-    (package-test-container
+    (test-package
      (nremove-test (container-for-package container) test))))
 
 (defun map-tests (function container)
   (etypecase container
     (simple-test-container
      (map nil function (slot-value container 'container)))
-    (package-test-container
+    (test-package
      (map-tests function (container-for-package container)))))
 
 (defun number-of-tests (container)
   (etypecase container
     (simple-test-container
      (length (slot-value container 'container)))
-    (package-test-container
+    (test-package
      (number-of-tests (container-for-package container)))))
 
 ;;;; - TEST INTERFACE

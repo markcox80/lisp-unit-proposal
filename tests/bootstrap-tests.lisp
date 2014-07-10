@@ -18,7 +18,7 @@
 	     (etypecase container
 	       (simple-test-container
 		(find test-name (slot-value container 'container) :key #'test-name))
-	       (package-test-container
+	       (test-package
 		(find-test test-name (container-for-package container))))))
 
     (let ((test (find-test 'bootstrap-test/success "LISP-UNIT-PROPOSAL")))

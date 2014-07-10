@@ -55,7 +55,7 @@
 
 (defun select-tests (filter container)
   (etypecase container
-    (package-test-container
+    (test-package
      (select-tests filter (container-for-package container)))
     (simple-test-container
      (let ((fn (if (functionp filter)
