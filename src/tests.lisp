@@ -27,7 +27,7 @@
   "Execute TEST and return all information about the execution in an
 object of type TEST-RESULTS."
   (let ((fn (coerce (test-body test) 'function))
-	(*results* (make-instance 'test-results)))
+	(*results* (make-instance 'test-results :test test)))
     (handler-case (funcall fn)
       (error (c)
 	(record-test-signalled-error *results* c))

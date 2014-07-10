@@ -2,7 +2,10 @@
 
 ;;;; TEST RESULTS
 (defclass test-results ()
-  ((assertion-count
+  ((test
+    :initarg :test
+    :reader test)
+   (assertion-count
     :initarg :assertion-count
     :accessor assertion-count)
    (successful-assertions-count
@@ -121,4 +124,6 @@ bound to each symbol in EXTRAS."
     (test-results
      (let ((c (unhandled-condition results)))
        (when c
-	 (write c :stream stream))))))
+	 (format stream "~A~%" (string-upcase (test-name (test results))))
+	 (pprint-logical-block (stream nil :prefix "  ")
+	   (write c :stream stream :pretty t)))))))
