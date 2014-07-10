@@ -161,6 +161,14 @@ object of type TEST-RESULTS."
     (test-package
      (number-of-tests (container-for-package container)))))
 
+(defun run-tests-in-container (container)
+  (let ((rv (make-instance 'test-results-collection)))
+    (map-tests #'(lambda (test)
+		   (let ((results (execute-test test)))		     
+		     (ninsert-test-results rv test results)))
+	       container)
+    rv))
+
 ;;;; - TEST INTERFACE
 (defun ensure-test (name package body &key tags)
   (let* ((object (make-instance 'test
