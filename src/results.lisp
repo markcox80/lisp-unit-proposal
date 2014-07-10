@@ -78,6 +78,9 @@ bound to each symbol in EXTRAS."
    (unhandled-condition-count
     :initarg :unhandled-condition-count
     :accessor unhandled-condition-count)
+   (missing-count
+    :initarg :missing-count
+    :accessor missing-count)
    (test-results-table
     :initarg :test-results-table
     :reader test-results-table))
@@ -86,6 +89,7 @@ bound to each symbol in EXTRAS."
    :assertion-count 0
    :successful-assertions-count 0
    :unhandled-condition-count 0
+   :missing-count 0
    :test-results-table (make-hash-table :test 'eql)))
 
 (defun ninsert-test-results (results-collection test results)
@@ -96,3 +100,25 @@ bound to each symbol in EXTRAS."
     (when (unhandled-condition results)
       (incf (unhandled-condition-count results-collection)))
     (setf (gethash (test-name test) test-results-table) results)))
+
+(defun print-summary (results &optional (stream *standard-output*))
+  (etypecase results
+    (test-results-collection
+     (format stream "Unit Test Summary~%")
+     (format stream " | ~d assertions total.~%" (assertion-count results))
+     (format stream " | ~d passed.~%" (successful-assertions-count results))
+     (format stream " | ~d failed.~%" (failed-assertions-count results))
+     (format stream " | ~d execution errors.~%" (unhandled-condition-count results))
+     (format stream " | ~d missing tests.~%" (missing-count results)))))
+
+(defun print-errors (results &optional (stream *standard-output*))
+  (etypecase results
+    (test-results-collection
+     (maphash #'(lambda (key value)
+		  (declare (ignore key))
+		  (print-errors value stream))
+	      (test-results-table results)))
+    (test-results
+     (let ((c (unhandled-condition results)))
+       (when c
+	 (write c :stream stream))))))
