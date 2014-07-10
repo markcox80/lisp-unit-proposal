@@ -6,5 +6,7 @@
 			:serial t
 			:components ((:file "packages")
 				     (:file "results")
-				     (:file "tests"))))
+				     (:file "tests")
+				     (:file "test-filters")
+				     (:file "builtin-test-filters"))))
   :in-order-to ((test-op (test-op "lisp-unit-proposal-tests"))))

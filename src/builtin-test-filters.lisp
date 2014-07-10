@@ -1,0 +1,37 @@
+(in-package "LISP-UNIT-PROPOSAL")
+
+(define-test-filter :or (&rest forms)
+  (let ((var (gensym)))
+    `(lambda (,var)
+       (or ,@(mapcar #'(lambda (form)
+			 `(,(expand-test-filter form) ,var))
+		     forms)))))
+
+(define-test-filter :and (&rest forms)
+  (let ((var (gensym)))
+    `(lambda (,var)
+       (and ,@(mapcar #'(lambda (form)
+			  `(,(expand-test-filter form) ,var))
+		      forms)))))
+
+(define-test-filter :not (form)
+  (let ((var (gensym)))
+    `(lambda (,var)
+       (not (,(expand-test-filter form) ,var)))))
+
+(define-test-filter :tag (tag)
+  (let ((var (gensym)))
+    `(lambda (,var)
+       (member ',tag (test-tags ,var)))))
+
+(define-test-filter :package (package)
+  (let ((var (gensym)))
+    `(lambda (,var)
+       (equal ,package (test-package ,var)))))
+
+(define-test-filter :tags (&rest tags)
+  (let ((var (gensym)))
+    `(lambda (,var)
+       (some #'(lambda (tag)
+		 (member tag ',tags))
+	     (test-tags ,var)))))
