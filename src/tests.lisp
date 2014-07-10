@@ -65,6 +65,9 @@ object of type TEST-RESULTS."
 	(t
 	 (format stream "~d tests" d))))))
 
+(defun make-test-container ()
+  (make-instance 'simple-test-container))
+
 ;;; - TEST-PACKAGE
 (defun test-package-p (object)
   (or (and (stringp object)
@@ -109,7 +112,7 @@ object of type TEST-RESULTS."
       (t
        (let ((new-table-item (make-instance 'table-item
 					    :table-item-package package
-					    :table-item-container (make-instance 'simple-test-container))))
+					    :table-item-container (make-test-container))))
 	 (setf (gethash (package-name package) *package-containers*) new-table-item)
 	 (table-item-container new-table-item))))))
 
