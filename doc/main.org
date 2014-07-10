@@ -66,8 +66,9 @@ output presented in the [[Motivation][motivation section]] are
 Alongside the function ~RUN-TEST-SELECTION~ there is
 - a new function ~SELECT-TESTS~.
 - a new function ~RUN-TESTS-IN-CONTAINER~. 
-- a new type called ~TEST-CONTAINER~.
-- a new type called ~TEST-PACKAGE~.
+- a new type ~TEST-CONTAINER~.
+- a new class ~SIMPLE-TEST-CONTAINER~.
+- a new type ~TEST-PACKAGE~.
 - a new macro ~DEFINE-TEST-SELECTION~.
 - a new macro ~DEFINE-TEST-FILTER~.
 
@@ -120,22 +121,28 @@ A test container is simply a collection of tests.
 #+begin_src lisp
   (deftype test-container ()
     `(or simple-test-container
-         package-test-container))
+         test-package))
 #+end_src
 There are two types of test containers, a ~SIMPLE-TEST-CONTAINER~ and
-a ~PACKAGE-TEST-CONTAINER~. A simple test container is a sequence of
-tests, and a package test container is a container associated with
-packages. Tests defined using ~DEFINE-TEST~ are always inserted in to
-an object of type ~PACKAGE-TEST-CONTAINER~.
+a ~TEST-PACKAGE~. A simple test container is an instance of the class
+~SIMPLE-TEST-CONTAINER~ and a package test container is a container
+associated with packages. Tests defined using ~DEFINE-TEST~ are always
+inserted in to an object of type ~PACKAGE-TEST-CONTAINER~.
 
 The contents of a test container can be queried and changed using the
-following functions.
+following protocol.
 #+begin_src lisp
 (defun ninsert-test (container test))
 (defun nremove-test (container test))
 (defun map-tests (function container))
 (defun number-of-tests (container))
 #+end_src
+
+Instances of ~SIMPLE-TEST-CONTAINER~ can be created using the function
+~MAKE-TEST-CONTAINER~.
+
+Objects of type ~TEST-PACKAGES~ are package designators and are
+created using the interfaces defined by the common lisp standard.
 
 * Defining test selections
 
@@ -164,7 +171,7 @@ A filter expression is one of the following
      package ~PACKAGE-DESIGNATOR~.
 - ~(SYMBOL &rest arguments)~ :: Invoke the test filter with the name
      ~SYMBOL~.
-- ~(LAMBDA var &body body)~ :: Invoke the lambda function with the
+- ~(LAMBDA (var) &body body)~ :: Invoke the lambda function with the
      test. The test matches if the lambda function returns
      non-nil. ~VAR~ must be a symbol and will be bound to the test
      being matched.
