@@ -53,10 +53,10 @@
   (let ((lambda-expression (expand-test-filter expression)))
     (compile nil lambda-expression)))
 
-(defun filter-tests (filter container)
+(defun filter-container (filter container)
   (etypecase container
     (test-package
-     (filter-tests filter (container-for-package container)))
+     (filter-container filter (container-for-package container)))
     (simple-test-container
      (let ((fn (if (functionp filter)
 		   filter
