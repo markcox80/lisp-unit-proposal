@@ -8,5 +8,6 @@
 				     (:file "results")
 				     (:file "tests")
 				     (:file "test-filters")
-				     (:file "builtin-test-filters"))))
+				     (:file "builtin-test-filters")
+				     (:file "test-selections"))))
   :in-order-to ((test-op (test-op "lisp-unit-proposal-tests"))))

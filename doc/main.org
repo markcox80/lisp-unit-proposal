@@ -5,9 +5,9 @@ This document outlines a proposal which would allow LISP-UNIT to run
 tests that span a number of packages.
 
 This document is written using the [[http://orgmode.org][Org mode]] markup language. A HTML
-version of this document can be created by opening this file in Emacs
-(with Org mode loaded) and typing ~M-x org-export-as-html-and-open
-RET~.
+version of this document can be created by opening the file
+~doc/main.org~ in Emacs (with Org mode loaded) and typing ~M-x
+org-export-as-html-and-open RET~.
 
 [TABLE-OF-CONTENTS]
 
@@ -53,17 +53,15 @@ Unit Test Summary
 #+end_src
 
 As of writing, ~LISP-UNIT~ is unable to produce the above output as
-the function ~RUN-TESTS~ provides no ability to specify multiple
-/test/ packages when executing tests. Furthermore, ~LISP-UNIT~
-provides no facility for merging the results of two or more
-invocations of ~RUN-TESTS~.
+the function ~LISP-UNIT:RUN-TESTS~ provides no ability to execute
+tests from multiple /test/ packages in a single
+invocation. Furthermore, ~LISP-UNIT~ provides no facility for merging
+the results of two or more invocations of ~RUN-TESTS~.
 
 * Proposal
 The proposed changes to ~LISP-UNIT~ required to achieve the desired
 output presented in the [[Motivation][motivation section]] are
 - the introduction of a new function ~RUN-TEST-SELECTION~.
-
-Alongside the function ~RUN-TEST-SELECTION~ there is
 - a new function ~SELECT-TESTS~.
 - a new function ~RUN-TESTS-IN-CONTAINER~. 
 - a new type ~TEST-CONTAINER~.
@@ -80,26 +78,38 @@ which specify what tests are to be executed.
 (defun run-test-selection (&rest forms))
 #+end_src
 Each form can be one of the following
-- ~TEST-PACKAGE-DESIGNTOR~ :: Execute all tests in the package designated
-     by the designator.
 - ~SELECTION-DESIGNATOR~ :: The name of a test selection. Test
      selections are created using the macro ~DEFINE-TEST-SELECTION~.
 - ~(:tags TEST-PACKAGE-DESIGNATOR [TAGS ... ])~ :: Execute all tests
      in the designated package that match one or more of the tags in
      ~TAGS~.
+- ~(:package TEST-PACKAGE-DESIGNATOR)~ :: Execute all tests in the
+     designated package.
 - ~(:packages [TEST-PACKAGE-DESIGNATORS ...])~ :: Execute all tests in
      the specified packages.
-- ~(TEST-FILTER-NAME TEST-PACKAGE-DESIGNATOR [ARGS ...])~ :: Execute
-     all tests in the specified package that match the filter. Any
-     arguments to the filter are placed in ~ARGS~. Filters are created
-     using the macro ~DEFINE-TEST-FILTER~.
+- ~(:filter TEST-PACKAGE-DESIGNATOR FILTER)~ :: Execute all tests in
+     the specified package that match the given filter. The argument
+     ~FILTER~ is a filter expression as used by ~DEFINE-TEST-FILTER~.
+- ~(:names TEST-PACKAGE-DESIGNATOR [NAMES ...])~ :: Execute the tests
+     in the designated packages that have the given names.
 
 * Selecting tests
 Selecting tests is performed using the ~SELECT-TESTS~ function.
 #+begin_src lisp
-(defun select-tests filter container)
+(defun select-tests (&rest test-selections))
 #+end_src
-The return value is a new test container containing the selected
+where ~TEST-SELECTIONS~ is a list of forms which specify what tests
+are to be selected. The forms accepted by ~SELECT-TESTS~ are the same
+as those used in ~RUN-TEST-SELECTION~. The return value is a
+~TEST-CONTAINER~ containing the filtered tests.
+
+Another way to select tests is with the ~FILTER-CONTAINER~. Unlike
+~SELECT-TESTS~, this function is limited to selecting from a single
+container.
+#+begin_src lisp
+(defun filter-container (filter container))
+#+end_src
+The return value is a new ~TEST-CONTAINER~ containing the selected
 tests. The argument ~CONTAINER~ is the container to select tests from
 and ~FILTER~ represents the predicate to select tests.
 
@@ -145,13 +155,42 @@ Objects of type ~TEST-PACKAGES~ are package designators and are
 created using the interfaces defined by the common lisp standard.
 
 * Defining test selections
+Test selections provide a method of selecting tests across multiple
+containers. This is useful when working with multiple test packages.
+
+Test selections can be created with the macro
+~DEFINE-TEST-SELECTION~. This macro associates a name with an
+operation for selecting tests.
+#+begin_src lisp
+(defmacro define-test-selection (name &body body))
+#+end_src
+The body argument to ~DEFINE-TEST-SELECTION~ specifies how tests are
+selected. Each element of ~BODY~ can be one of the following forms:
+- ~SELECTION-DESIGNATOR~ :: The name of a test selection. Test
+     selections are created using the macro ~DEFINE-TEST-SELECTION~.
+- ~(:tags TEST-PACKAGE-DESIGNATOR [TAGS ... ])~ :: Select all tests in
+     the designated package that match one or more of the tags in
+     ~TAGS~.
+- ~(:package TEST-PACKAGE-DESIGNATOR)~ :: Select all tests in the
+     designated package.
+- ~(:packages [TEST-PACKAGE-DESIGNATORS ...])~ :: Select all tests in
+     the specified packages.
+- ~(:filter TEST-PACKAGE-DESIGNATOR FILTER)~ :: Select all tests in
+     the designator package that match the specified filter. ~FILTER~
+     is a valid filter expression used in the body of test filter.
+- ~(:names TEST-PACKAGE-DESIGNATOR [NAMES ...])~ :: Select specific
+     tests from the test package designator.
+- ~(TEST-FILTER-NAME TEST-PACKAGE-DESIGNATOR [ARGS ...])~ :: Select
+     all tests in the specified package that match the filter. Any
+     arguments to the filter are placed in ~ARGS~. Filters are created
+     using the macro ~DEFINE-TEST-FILTER~.
 
 * Defining test filters
 Test filters are used by the ~SELECT-TEST~ function to filter tests in
 a container. The macro ~DEFINE-TEST-FILTER~ provides a language for
 composing filters.
 #+begin_src lisp
-(defmacro define-test-filter (name test-lambda-list body))
+(defmacro define-test-filter (name test-lambda-list &body body))
 #+end_src
 The symbol ~NAME~ specifies the name of the test filter,
 ~TEST-LAMBDA-LIST~ represents the arguments to the filter and ~BODY~
