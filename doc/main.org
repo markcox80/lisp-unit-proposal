@@ -159,31 +159,52 @@ Test selections provide a method of selecting tests across multiple
 containers. This is useful when working with multiple test packages.
 
 Test selections can be created with the macro
-~DEFINE-TEST-SELECTION~. This macro associates a name with an
-operation for selecting tests.
+~DEFINE-TEST-SELECTION~. 
 #+begin_src lisp
-(defmacro define-test-selection (name &body body))
+(defmacro define-test-selection (name selection-lambda-list &body body))
 #+end_src
-The body argument to ~DEFINE-TEST-SELECTION~ specifies how tests are
-selected. Each element of ~BODY~ can be one of the following forms:
-- ~SELECTION-DESIGNATOR~ :: The name of a test selection. Test
-     selections are created using the macro ~DEFINE-TEST-SELECTION~.
-- ~(:tags TEST-PACKAGE-DESIGNATOR [TAGS ... ])~ :: Select all tests in
+The symbol ~NAME~ specifies the name of the test selection,
+~SELECTION-LAMBDA-LIST~ represents the arguments to the test selection
+~BODY~ is an implicit progn which assembles a selection
+expression.
+
+A selection expression is one of the following:
+- ~SYMBOL~ :: The name of a test selection. Test selections are
+              created using the macro ~DEFINE-TEST-SELECTION~.
+- ~(:TAGS TEST-PACKAGE-DESIGNATOR [TAGS ... ])~ :: Select all tests in
      the designated package that match one or more of the tags in
      ~TAGS~.
-- ~(:package TEST-PACKAGE-DESIGNATOR)~ :: Select all tests in the
+- ~(:PACKAGE TEST-PACKAGE-DESIGNATOR)~ :: Select all tests in the
      designated package.
-- ~(:packages [TEST-PACKAGE-DESIGNATORS ...])~ :: Select all tests in
+- ~(:PACKAGES [TEST-PACKAGE-DESIGNATORS ...])~ :: Select all tests in
      the specified packages.
-- ~(:filter TEST-PACKAGE-DESIGNATOR FILTER)~ :: Select all tests in
+- ~(:FILTER TEST-PACKAGE-DESIGNATOR FILTER)~ :: Select all tests in
      the designator package that match the specified filter. ~FILTER~
-     is a valid filter expression used in the body of test filter.
-- ~(:names TEST-PACKAGE-DESIGNATOR [NAMES ...])~ :: Select specific
+     is a valid filter expression used in the body of a
+     ~DEFINE-TEST-FILTER~ form.
+- ~(:NAMES TEST-PACKAGE-DESIGNATOR [NAMES ...])~ :: Select specific
      tests from the test package designator.
-- ~(TEST-FILTER-NAME TEST-PACKAGE-DESIGNATOR [ARGS ...])~ :: Select
-     all tests in the specified package that match the filter. Any
-     arguments to the filter are placed in ~ARGS~. Filters are created
-     using the macro ~DEFINE-TEST-FILTER~.
+- ~(SYMBOL [ARGS ...])~ :: Invoke the test selection with the name
+     ~SYMBOL~.
+- ~(LAMBDA () &body body)~ :: Invoke the lambda form. The lambda form
+     must return a test container which contains the selected tests.
+
+A selection expression can be compiled to a function object using the
+function ~COMPILE-TEST-SELECTION~.
+#+begin_src lisp
+(defun compile-test-selection (expression))
+#+end_src
+The returned function object accepts no arguments.
+
+Associated with the function ~COMPILE-TEST-SELECTION~ are the
+following functions
+#+begin_src lisp
+(defun expand-test-selection (expression))
+(defun expand-test-selection-1 (expression))
+#+end_src
+The function ~EXPAND-TEST-SELECTION~ repeatedly calls
+~EXPAND-TEST-SELECTION-1~ until the expression returned by
+~EXPAND-TEST-SELECTION-1~ is a ~LAMBDA~ test selection expression.
 
 * Defining test filters
 Test filters are used by the ~SELECT-TEST~ function to filter tests in
@@ -196,7 +217,7 @@ The symbol ~NAME~ specifies the name of the test filter,
 ~TEST-LAMBDA-LIST~ represents the arguments to the filter and ~BODY~
 is an implicit progn which assembles a filter expression.
 
-A filter expression is one of the following
+A filter expression is one of the following:
 - ~(:OR [SUB-FILTER-EXPRESSIONS ...])~ :: Match at least one of the sub
      filter expressions.
 - ~(:AND [SUB-FILTER-EXPRESSIONS ...])~ :: Match all of the sub filter
@@ -210,7 +231,7 @@ A filter expression is one of the following
      package ~PACKAGE-DESIGNATOR~.
 - ~(SYMBOL &rest arguments)~ :: Invoke the test filter with the name
      ~SYMBOL~.
-- ~(LAMBDA (var) &body body)~ :: Invoke the lambda function with the
+- ~(LAMBDA (var) &body body)~ :: Invoke the lambda form with the
      test. The test matches if the lambda function returns
      non-nil. ~VAR~ must be a symbol and will be bound to the test
      being matched.
