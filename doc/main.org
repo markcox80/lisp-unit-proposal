@@ -17,7 +17,6 @@ uses ~LISP-UNIT~ to manage its tests. The following text is the output
 of ~ASDF:TEST-SYSTEM~ for this system.
 #+begin_src text
 cl-user> (asdf:test-system "music-player")
-
 ;; Running tests in package: MUSIC-PLAYER.CONTROLLER.TESTS
 Unit Test Summary
  | 1 assertions total
@@ -43,7 +42,6 @@ the ~MUSIC-PLAYER~ system, rather than specifics of the
 implementation. i.e. it should be
 #+begin_src text
 cl-user> (asdf:test-system "music-player")
-
 Unit Test Summary
  | 2 assertions total
  | 2 passed
@@ -70,6 +68,19 @@ output presented in the [[Motivation][motivation section]] are
 - a new macro ~DEFINE-TEST-SELECTION~.
 - a new macro ~DEFINE-TEST-FILTER~.
 
+An example prototype implementation of the new functionality is
+provided within the proposal. The desired output can be seen with the
+following
+#+begin_src text
+cl-user> (asdf:test-system "music-player-lup")
+Unit Test Summary
+ | 2 assertions total
+ | 2 passed
+ | 0 failed
+ | 0 execution errors
+ | 0 missing tests
+#+end_src
+
 * Run test selection
 The ~RUN-TEST-SELECTION~ function combines the selection and execution
 of tests. The arguments to ~RUN-TEST-SELECTION~ are a list of forms
@@ -78,23 +89,25 @@ which specify what tests are to be executed.
 (defun run-test-selection (&rest forms))
 #+end_src
 Each form can be one of the following
-- ~SELECTION-DESIGNATOR~ :: The name of a test selection. Test
-     selections are created using the macro ~DEFINE-TEST-SELECTION~.
-- ~(:tags TEST-PACKAGE-DESIGNATOR [TAGS ... ])~ :: Execute all tests
+- ~SYMBOL~ :: The name of a test selection. Test selections are
+              created using the macro ~DEFINE-TEST-SELECTION~.
+- ~(:TAGS TEST-PACKAGE-DESIGNATOR [TAGS ... ])~ :: Execute all tests
      in the designated package that match one or more of the tags in
      ~TAGS~.
-- ~(:package TEST-PACKAGE-DESIGNATOR)~ :: Execute all tests in the
+- ~(:PACKAGE TEST-PACKAGE-DESIGNATOR)~ :: Execute all tests in the
      designated package.
-- ~(:packages [TEST-PACKAGE-DESIGNATORS ...])~ :: Execute all tests in
+- ~(:PACKAGES [TEST-PACKAGE-DESIGNATORS ...])~ :: Execute all tests in
      the specified packages.
-- ~(:filter TEST-PACKAGE-DESIGNATOR FILTER)~ :: Execute all tests in
+- ~(:FILTER TEST-PACKAGE-DESIGNATOR FILTER)~ :: Execute all tests in
      the specified package that match the given filter. The argument
      ~FILTER~ is a filter expression as used by ~DEFINE-TEST-FILTER~.
-- ~(:names TEST-PACKAGE-DESIGNATOR [NAMES ...])~ :: Execute the tests
+- ~(:NAMES TEST-PACKAGE-DESIGNATOR [NAMES ...])~ :: Execute the tests
      in the designated packages that have the given names.
+- ~(SYMBOL [ARGS ...])~ :: Invoke the test selection with the name
+     ~SYMBOL~.
 
 * Selecting tests
-Selecting tests is performed using the ~SELECT-TESTS~ function.
+Selecting tests is performed using the ~SELECT-TESTS~ function
 #+begin_src lisp
 (defun select-tests (&rest test-selections))
 #+end_src
@@ -165,7 +178,7 @@ Test selections can be created with the macro
 #+end_src
 The symbol ~NAME~ specifies the name of the test selection,
 ~SELECTION-LAMBDA-LIST~ represents the arguments to the test selection
-~BODY~ is an implicit progn which assembles a selection
+and ~BODY~ is an implicit progn which assembles a selection
 expression.
 
 A selection expression is one of the following:
