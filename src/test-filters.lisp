@@ -36,16 +36,22 @@
 		       :body ',body))
 
 (defun expand-test-filter (expression)
+  (let ((new-expression (expand-test-filter-1 expression)))
+    (if (eql new-expression expression)
+	expression
+	(expand-test-filter new-expression))))
+
+(defun expand-test-filter-1 (expression)
   (cond
     ((and (listp expression) (eql 'lambda (first expression)))
      expression)
     ((symbolp expression)
      (let ((info (test-filter-for-symbol expression)))
-       (expand-test-filter (funcall (test-filter-function info)))))
+       (funcall (test-filter-function info))))
     ((listp expression)
      (destructuring-bind (name &rest args) expression
        (let ((info (test-filter-for-symbol name)))
-	 (expand-test-filter (apply (test-filter-function info) args)))))
+	 (apply (test-filter-function info) args))))
     (t
      (error "Invalid test filter expression: ~A." expression))))
 
