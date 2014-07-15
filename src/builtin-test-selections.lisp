@@ -9,7 +9,7 @@
 
 (define-test-selection :packages (&rest test-package-designators)
   `(lambda ()
-     (apply #'concatenate-containers ,test-package-designators)))
+     (concatenate-containers ,@test-package-designators)))
 
 (define-test-selection :filter (test-package-designator filter)
   `(lambda ()
