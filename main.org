@@ -1,0 +1,267 @@
+#+TITLE: Proposal: RUN-TEST-SELECTION Extension for LISP-UNIT
+#+AUTHOR: Mark Cox
+
+This document outlines a proposal which would allow LISP-UNIT to run
+tests that span a number of packages.
+
+This document is written using the [[http://orgmode.org][Org mode]] markup language. A HTML
+version of this document can be created by opening the file
+~doc/main.org~ in Emacs (with Org mode loaded) and typing ~M-x
+org-export-as-html-and-open RET~.
+
+[TABLE-OF-CONTENTS]
+
+* Motivation
+This proposal contains an example system titled ~MUSIC-PLAYER~ which
+uses ~LISP-UNIT~ to manage its tests. The following text is the output
+of ~ASDF:TEST-SYSTEM~ for this system.
+#+begin_src text
+cl-user> (asdf:test-system "music-player")
+;; Running tests in package: MUSIC-PLAYER.CONTROLLER.TESTS
+Unit Test Summary
+ | 1 assertions total
+ | 1 passed
+ | 0 failed
+ | 0 execution errors
+ | 0 missing tests
+
+;; Running tests in package: MUSIC-PLAYER.CODEC.TESTS
+Unit Test Summary
+ | 1 assertions total
+ | 1 passed
+ | 0 failed
+ | 0 execution errors
+ | 0 missing tests
+#+end_src
+The drawback of the above output is that it is not a summary of the
+tests for the ~MUSIC-PLAYER~ system, but rather a summary of the tests
+in two packages. 
+
+From the user's perspective, the output should be concise and be about
+the ~MUSIC-PLAYER~ system, rather than specifics of the
+implementation. i.e. it should be
+#+begin_src text
+cl-user> (asdf:test-system "music-player")
+Unit Test Summary
+ | 2 assertions total
+ | 2 passed
+ | 0 failed
+ | 0 execution errors
+ | 0 missing tests
+#+end_src
+
+As of writing, ~LISP-UNIT~ is unable to produce the above output as
+the function ~LISP-UNIT:RUN-TESTS~ provides no ability to execute
+tests from multiple /test/ packages in a single
+invocation. Furthermore, ~LISP-UNIT~ provides no facility for merging
+the results of two or more invocations of ~RUN-TESTS~.
+
+* Proposal
+The proposed changes to ~LISP-UNIT~ required to achieve the desired
+output presented in the [[Motivation][motivation section]] are
+- the introduction of a new function ~RUN-TEST-SELECTION~.
+- a new function ~SELECT-TESTS~.
+- a new function ~RUN-TESTS-IN-CONTAINER~. 
+- a new type ~TEST-CONTAINER~.
+- a new class ~SIMPLE-TEST-CONTAINER~.
+- a new type ~TEST-PACKAGE~.
+- a new macro ~DEFINE-TEST-SELECTION~.
+- a new macro ~DEFINE-TEST-FILTER~.
+
+An example prototype implementation of the new functionality is
+provided within the proposal. The desired output can be seen with the
+following
+#+begin_src text
+cl-user> (asdf:test-system "music-player-lup")
+Unit Test Summary
+ | 2 assertions total
+ | 2 passed
+ | 0 failed
+ | 0 execution errors
+ | 0 missing tests
+#+end_src
+
+* Run test selection
+The ~RUN-TEST-SELECTION~ function combines the selection and execution
+of tests. The arguments to ~RUN-TEST-SELECTION~ are a list of forms
+which specify what tests are to be executed. 
+#+begin_src lisp
+(defun run-test-selection (&rest forms))
+#+end_src
+Each form can be one of the following
+- ~SYMBOL~ :: The name of a test selection. Test selections are
+              created using the macro ~DEFINE-TEST-SELECTION~.
+- ~(:TAGS TEST-PACKAGE-DESIGNATOR [TAGS ... ])~ :: Execute all tests
+     in the designated package that match one or more of the tags in
+     ~TAGS~.
+- ~(:PACKAGE TEST-PACKAGE-DESIGNATOR)~ :: Execute all tests in the
+     designated package.
+- ~(:PACKAGES [TEST-PACKAGE-DESIGNATORS ...])~ :: Execute all tests in
+     the specified packages.
+- ~(:FILTER TEST-PACKAGE-DESIGNATOR FILTER)~ :: Execute all tests in
+     the specified package that match the given filter. The argument
+     ~FILTER~ is a filter expression as used by ~DEFINE-TEST-FILTER~.
+- ~(:NAMES TEST-PACKAGE-DESIGNATOR [NAMES ...])~ :: Execute the tests
+     in the designated packages that have the given names.
+- ~(SYMBOL [ARGS ...])~ :: Invoke the test selection with the name
+     ~SYMBOL~.
+
+* Selecting tests
+Selecting tests is performed using the ~SELECT-TESTS~ function
+#+begin_src lisp
+(defun select-tests (&rest test-selections))
+#+end_src
+where ~TEST-SELECTIONS~ is a list of forms which specify what tests
+are to be selected. The forms accepted by ~SELECT-TESTS~ are the same
+as those used in ~RUN-TEST-SELECTION~. The return value is a
+~TEST-CONTAINER~ containing the filtered tests.
+
+Another way to select tests is with the ~FILTER-CONTAINER~. Unlike
+~SELECT-TESTS~, this function is limited to selecting from a single
+container.
+#+begin_src lisp
+(defun filter-container (filter container))
+#+end_src
+The return value is a new ~TEST-CONTAINER~ containing the selected
+tests. The argument ~CONTAINER~ is the container to select tests from
+and ~FILTER~ represents the predicate to select tests.
+
+The ~FILTER~ argument can be one of the following
+- A function object. 
+- A lambda form.
+- A symbol denoting the name of a test filter.
+- A test filter expression (See [[Defining test filters]]).
+* Executing tests
+Execution of tests is performed using the ~RUN-TESTS-IN-CONTAINER~
+function.
+#+begin_src lisp
+(defun run-tests-in-container (container))
+#+end_src
+The object returned is a results object.
+
+* Test containers
+A test container is simply a collection of tests.
+#+begin_src lisp
+  (deftype test-container ()
+    `(or simple-test-container
+         test-package))
+#+end_src
+There are two types of test containers, a ~SIMPLE-TEST-CONTAINER~ and
+a ~TEST-PACKAGE~. A simple test container is an instance of the class
+~SIMPLE-TEST-CONTAINER~ and a package test container is a container
+associated with packages. Tests defined using ~DEFINE-TEST~ are always
+inserted in to an object of type ~PACKAGE-TEST-CONTAINER~.
+
+The contents of a test container can be queried and changed using the
+following protocol.
+#+begin_src lisp
+(defun ninsert-test (container test))
+(defun nremove-test (container test))
+(defun map-tests (function container))
+(defun number-of-tests (container))
+#+end_src
+
+Instances of ~SIMPLE-TEST-CONTAINER~ can be created using the function
+~MAKE-TEST-CONTAINER~.
+
+Objects of type ~TEST-PACKAGES~ are package designators and are
+created using the interfaces defined by the common lisp standard.
+
+* Defining test selections
+Test selections provide a method of selecting tests across multiple
+containers. This is useful when working with multiple test packages.
+
+Test selections can be created with the macro
+~DEFINE-TEST-SELECTION~. 
+#+begin_src lisp
+(defmacro define-test-selection (name selection-lambda-list &body body))
+#+end_src
+The symbol ~NAME~ specifies the name of the test selection,
+~SELECTION-LAMBDA-LIST~ represents the arguments to the test selection
+and ~BODY~ is an implicit progn which assembles a selection
+expression.
+
+A selection expression is one of the following:
+- ~SYMBOL~ :: The name of a test selection. Test selections are
+              created using the macro ~DEFINE-TEST-SELECTION~.
+- ~(:TAGS TEST-PACKAGE-DESIGNATOR [TAGS ... ])~ :: Select all tests in
+     the designated package that match one or more of the tags in
+     ~TAGS~.
+- ~(:PACKAGE TEST-PACKAGE-DESIGNATOR)~ :: Select all tests in the
+     designated package.
+- ~(:PACKAGES [TEST-PACKAGE-DESIGNATORS ...])~ :: Select all tests in
+     the specified packages.
+- ~(:FILTER TEST-PACKAGE-DESIGNATOR FILTER)~ :: Select all tests in
+     the designator package that match the specified filter. ~FILTER~
+     is a valid filter expression used in the body of a
+     ~DEFINE-TEST-FILTER~ form.
+- ~(:NAMES TEST-PACKAGE-DESIGNATOR [NAMES ...])~ :: Select specific
+     tests from the test package designator.
+- ~(SYMBOL [ARGS ...])~ :: Invoke the test selection with the name
+     ~SYMBOL~.
+- ~(LAMBDA () &body body)~ :: Invoke the lambda form. The lambda form
+     must return a test container which contains the selected tests.
+
+A selection expression can be compiled to a function object using the
+function ~COMPILE-TEST-SELECTION~.
+#+begin_src lisp
+(defun compile-test-selection (expression))
+#+end_src
+The returned function object accepts no arguments.
+
+Associated with the function ~COMPILE-TEST-SELECTION~ are the
+following functions
+#+begin_src lisp
+(defun expand-test-selection (expression))
+(defun expand-test-selection-1 (expression))
+#+end_src
+The function ~EXPAND-TEST-SELECTION~ repeatedly calls
+~EXPAND-TEST-SELECTION-1~ until the expression returned by
+~EXPAND-TEST-SELECTION-1~ is a ~LAMBDA~ test selection expression.
+
+* Defining test filters
+Test filters are used by the ~SELECT-TEST~ function to filter tests in
+a container. The macro ~DEFINE-TEST-FILTER~ provides a language for
+composing filters.
+#+begin_src lisp
+(defmacro define-test-filter (name test-lambda-list &body body))
+#+end_src
+The symbol ~NAME~ specifies the name of the test filter,
+~TEST-LAMBDA-LIST~ represents the arguments to the filter and ~BODY~
+is an implicit progn which assembles a filter expression.
+
+A filter expression is one of the following:
+- ~(:OR [SUB-FILTER-EXPRESSIONS ...])~ :: Match at least one of the sub
+     filter expressions.
+- ~(:AND [SUB-FILTER-EXPRESSIONS ...])~ :: Match all of the sub filter
+     expressions.
+- ~(:NOT SUB-FILTER-EXPRESSION)~ :: Negate the match of the sub filter
+     expression.
+- ~(:TAG TAG)~ :: The test has the ~TAG~ as one of its tags.
+- ~(:TAGS [TAGS ...])~ :: The test has one more ~TAGS~ as one of its
+     tags.
+- ~(:PACKAGE PACKAGE-DESIGNATOR)~ :: The test is defined in the
+     package ~PACKAGE-DESIGNATOR~.
+- ~(SYMBOL &rest arguments)~ :: Invoke the test filter with the name
+     ~SYMBOL~.
+- ~(LAMBDA (var) &body body)~ :: Invoke the lambda form with the
+     test. The test matches if the lambda function returns
+     non-nil. ~VAR~ must be a symbol and will be bound to the test
+     being matched.
+
+A filter expression can be compiled to a function object using the
+function ~COMPILE-TEST-FILTER~. The returned function object accepts a
+single argument, an object representing a test.
+#+begin_src lisp
+(defun compile-test-filter (expression))
+#+end_src
+
+Associated with ~COMPILE-TEST-FILTER~ are the functions
+#+begin_src lisp
+(defun expand-test-filter (expression))
+(defun expand-test-filter-1 (expression))
+#+end_src
+These functions are responsible for expanding the filter expression in
+to a ~LAMBDA~ filter expression. The function ~EXPAND-TEST-FILTER~
+performs the expansion by repeatedly calling ~EXPAND-TEST-FILTER-1~
+until the expression returned is a lambda filter expression.

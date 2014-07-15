@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>RUN-TEST-SELECTION Proposal for LISP-UNIT</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="title" content="RUN-TEST-SELECTION Proposal for LISP-UNIT"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2014-07-15T11:49+1000"/>
+<meta name="author" content="Mark Cox"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
+  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
+  .center {margin-left:auto; margin-right:auto; text-align:center;}
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top;  }
+  th.right  { text-align:center;  }
+  th.left   { text-align:center;   }
+  th.center { text-align:center; }
+  td.right  { text-align:right;  }
+  td.left   { text-align:left;   }
+  td.center { text-align:center; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  div.inlinetask {
+    padding:10px;
+    border:2px solid gray;
+    margin:10px;
+    background: #ffffcc;
+  }
+  textarea { overflow-x: auto; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link id="pagestyle" rel="stylesheet" type="text/css" href="solarized-light.css" />
+<script type="text/javascript" src="org-info.js">
+/**
+ *
+ * @source: org-info.js
+ *
+ * @licstart  The following is the entire license notice for the
+ *  JavaScript code in org-info.js.
+ *
+ * Copyright (C) 2012-2013  Sebastian Rose
+ *
+ *
+ * The JavaScript code in this tag is free software: you can
+ * redistribute it and/or modify it under the terms of the GNU
+ * General Public License (GNU GPL) as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option)
+ * any later version.  The code is distributed WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+ *
+ * As additional permission under GNU GPL version 3 section 7, you
+ * may distribute non-source (e.g., minimized or compacted) forms of
+ * that code without the copy of the GNU GPL normally required by
+ * section 4, provided you include this license notice and a URL
+ * through which recipients can access the Corresponding Source.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in org-info.js.
+ *
+ */
+</script>
+
+<script type="text/javascript">
+
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+
+<!--/*--><![CDATA[/*><!--*/
+org_html_manager.set("TOC_DEPTH", "3");
+org_html_manager.set("LINK_HOME", "");
+org_html_manager.set("LINK_UP", "");
+org_html_manager.set("LOCAL_TOC", "1");
+org_html_manager.set("VIEW_BUTTONS", "0");
+org_html_manager.set("MOUSE_HINT", "underline");
+org_html_manager.set("FIXED_TOC", "0");
+org_html_manager.set("TOC", "1");
+org_html_manager.set("VIEW", "info");
+org_html_manager.setup();  // activate after the parameters are set
+/*]]>*///-->
+</script>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+
+</head>
+<body>
+
+<div id="preamble">
+
+</div>
+
+<div id="content">
+<h1 class="title">RUN-TEST-SELECTION Proposal for LISP-UNIT</h1>
+
+
+<p>
+This document outlines a proposal which would allow LISP-UNIT to run
+tests that span a number of packages.
+</p>
+<p>
+This document is written using the <a href="http://orgmode.org">Org mode</a> markup language. A HTML
+version of this document can be created by opening the file
+<code>doc/main.org</code> in Emacs (with Org mode loaded) and typing <code>M-x org-export-as-html-and-open RET</code>.
+</p>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Motivation</a></li>
+<li><a href="#sec-2">2 Proposal</a></li>
+<li><a href="#sec-3">3 Run test selection</a></li>
+<li><a href="#sec-4">4 Selecting tests</a></li>
+<li><a href="#sec-5">5 Executing tests</a></li>
+<li><a href="#sec-6">6 Test containers</a></li>
+<li><a href="#sec-7">7 Defining test selections</a></li>
+<li><a href="#sec-8">8 Defining test filters</a></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Motivation</h2>
+<div class="outline-text-2" id="text-1">
+
+<p>This proposal contains an example system titled <code>MUSIC-PLAYER</code> which
+uses <code>LISP-UNIT</code> to manage its tests. The following text is the output
+of <code>ASDF:TEST-SYSTEM</code> for this system.
+</p>
+
+
+<pre class="src src-text">cl-user&gt; (asdf:test-system "music-player")
+;; Running tests in package: MUSIC-PLAYER.CONTROLLER.TESTS
+Unit Test Summary
+ | 1 assertions total
+ | 1 passed
+ | 0 failed
+ | 0 execution errors
+ | 0 missing tests
+
+;; Running tests in package: MUSIC-PLAYER.CODEC.TESTS
+Unit Test Summary
+ | 1 assertions total
+ | 1 passed
+ | 0 failed
+ | 0 execution errors
+ | 0 missing tests
+</pre>
+
+<p>
+The drawback of the above output is that it is not a summary of the
+tests for the <code>MUSIC-PLAYER</code> system, but rather a summary of the tests
+in two packages. 
+</p>
+<p>
+From the user's perspective, the output should be concise and be about
+the <code>MUSIC-PLAYER</code> system, rather than specifics of the
+implementation. i.e. it should be
+</p>
+
+
+<pre class="src src-text">cl-user&gt; (asdf:test-system "music-player")
+Unit Test Summary
+ | 2 assertions total
+ | 2 passed
+ | 0 failed
+ | 0 execution errors
+ | 0 missing tests
+</pre>
+
+
+<p>
+As of writing, <code>LISP-UNIT</code> is unable to produce the above output as
+the function <code>LISP-UNIT:RUN-TESTS</code> provides no ability to execute
+tests from multiple <i>test</i> packages in a single
+invocation. Furthermore, <code>LISP-UNIT</code> provides no facility for merging
+the results of two or more invocations of <code>RUN-TESTS</code>.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Proposal</h2>
+<div class="outline-text-2" id="text-2">
+
+<p>The proposed changes to <code>LISP-UNIT</code> required to achieve the desired
+output presented in the <a href="#sec-1">motivation section</a> are
+</p><ul>
+<li>the introduction of a new function <code>RUN-TEST-SELECTION</code>.
+</li>
+<li>a new function <code>SELECT-TESTS</code>.
+</li>
+<li>a new function <code>RUN-TESTS-IN-CONTAINER</code>. 
+</li>
+<li>a new type <code>TEST-CONTAINER</code>.
+</li>
+<li>a new class <code>SIMPLE-TEST-CONTAINER</code>.
+</li>
+<li>a new type <code>TEST-PACKAGE</code>.
+</li>
+<li>a new macro <code>DEFINE-TEST-SELECTION</code>.
+</li>
+<li>a new macro <code>DEFINE-TEST-FILTER</code>.
+</li>
+</ul>
+
+
+<p>
+An example prototype implementation of the new functionality is
+provided within the proposal. The desired output can be seen with the
+following
+</p>
+
+
+<pre class="src src-text">cl-user&gt; (asdf:test-system "music-player-lup")
+Unit Test Summary
+ | 2 assertions total
+ | 2 passed
+ | 0 failed
+ | 0 execution errors
+ | 0 missing tests
+</pre>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Run test selection</h2>
+<div class="outline-text-2" id="text-3">
+
+<p>The <code>RUN-TEST-SELECTION</code> function combines the selection and execution
+of tests. The arguments to <code>RUN-TEST-SELECTION</code> are a list of forms
+which specify what tests are to be executed. 
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">run-test-selection</span> (<span style="color: #a57705;">&amp;rest</span> forms))
+</pre>
+
+<p>
+Each form can be one of the following
+</p><dl>
+<dt><code>SYMBOL</code></dt><dd>The name of a test selection. Test selections are
+              created using the macro <code>DEFINE-TEST-SELECTION</code>.
+</dd>
+<dt><code>(:TAGS TEST-PACKAGE-DESIGNATOR [TAGS ... ])</code></dt><dd>Execute all tests
+     in the designated package that match one or more of the tags in
+     <code>TAGS</code>.
+</dd>
+<dt><code>(:PACKAGE TEST-PACKAGE-DESIGNATOR)</code></dt><dd>Execute all tests in the
+     designated package.
+</dd>
+<dt><code>(:PACKAGES [TEST-PACKAGE-DESIGNATORS ...])</code></dt><dd>Execute all tests in
+     the specified packages.
+</dd>
+<dt><code>(:FILTER TEST-PACKAGE-DESIGNATOR FILTER)</code></dt><dd>Execute all tests in
+     the specified package that match the given filter. The argument
+     <code>FILTER</code> is a filter expression as used by <code>DEFINE-TEST-FILTER</code>.
+</dd>
+<dt><code>(:NAMES TEST-PACKAGE-DESIGNATOR [NAMES ...])</code></dt><dd>Execute the tests
+     in the designated packages that have the given names.
+</dd>
+<dt><code>(SYMBOL [ARGS ...])</code></dt><dd>Invoke the test selection with the name
+     <code>SYMBOL</code>.
+</dd>
+</dl>
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Selecting tests</h2>
+<div class="outline-text-2" id="text-4">
+
+<p>Selecting tests is performed using the <code>SELECT-TESTS</code> function
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">select-tests</span> (<span style="color: #a57705;">&amp;rest</span> test-selections))
+</pre>
+
+<p>
+where <code>TEST-SELECTIONS</code> is a list of forms which specify what tests
+are to be selected. The forms accepted by <code>SELECT-TESTS</code> are the same
+as those used in <code>RUN-TEST-SELECTION</code>. The return value is a
+<code>TEST-CONTAINER</code> containing the filtered tests.
+</p>
+<p>
+Another way to select tests is with the <code>FILTER-CONTAINER</code>. Unlike
+<code>SELECT-TESTS</code>, this function is limited to selecting from a single
+container.
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">filter-container</span> (filter container))
+</pre>
+
+<p>
+The return value is a new <code>TEST-CONTAINER</code> containing the selected
+tests. The argument <code>CONTAINER</code> is the container to select tests from
+and <code>FILTER</code> represents the predicate to select tests.
+</p>
+<p>
+The <code>FILTER</code> argument can be one of the following
+</p><ul>
+<li>A function object. 
+</li>
+<li>A lambda form.
+</li>
+<li>A symbol denoting the name of a test filter.
+</li>
+<li>A test filter expression (See <a href="#sec-8">Defining test filters</a>).
+</li>
+</ul>
+
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Executing tests</h2>
+<div class="outline-text-2" id="text-5">
+
+<p>Execution of tests is performed using the <code>RUN-TESTS-IN-CONTAINER</code>
+function.
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">run-tests-in-container</span> (container))
+</pre>
+
+<p>
+The object returned is a results object.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Test containers</h2>
+<div class="outline-text-2" id="text-6">
+
+<p>A test container is simply a collection of tests.
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">deftype</span> <span style="color: #a57705;">test-container</span> ()
+  `(or simple-test-container
+       test-package))
+</pre>
+
+<p>
+There are two types of test containers, a <code>SIMPLE-TEST-CONTAINER</code> and
+a <code>TEST-PACKAGE</code>. A simple test container is an instance of the class
+<code>SIMPLE-TEST-CONTAINER</code> and a package test container is a container
+associated with packages. Tests defined using <code>DEFINE-TEST</code> are always
+inserted in to an object of type <code>PACKAGE-TEST-CONTAINER</code>.
+</p>
+<p>
+The contents of a test container can be queried and changed using the
+following protocol.
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">ninsert-test</span> (container test))
+(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">nremove-test</span> (container test))
+(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">map-tests</span> (function container))
+(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">number-of-tests</span> (container))
+</pre>
+
+
+<p>
+Instances of <code>SIMPLE-TEST-CONTAINER</code> can be created using the function
+<code>MAKE-TEST-CONTAINER</code>.
+</p>
+<p>
+Objects of type <code>TEST-PACKAGES</code> are package designators and are
+created using the interfaces defined by the common lisp standard.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> Defining test selections</h2>
+<div class="outline-text-2" id="text-7">
+
+<p>Test selections provide a method of selecting tests across multiple
+containers. This is useful when working with multiple test packages.
+</p>
+<p>
+Test selections can be created with the macro
+<code>DEFINE-TEST-SELECTION</code>. 
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">defmacro</span> <span style="color: #2075c7;">define-test-selection</span> (name selection-lambda-list <span style="color: #a57705;">&amp;body</span> body))
+</pre>
+
+<p>
+The symbol <code>NAME</code> specifies the name of the test selection,
+<code>SELECTION-LAMBDA-LIST</code> represents the arguments to the test selection
+and <code>BODY</code> is an implicit progn which assembles a selection
+expression.
+</p>
+<p>
+A selection expression is one of the following:
+</p><dl>
+<dt><code>SYMBOL</code></dt><dd>The name of a test selection. Test selections are
+              created using the macro <code>DEFINE-TEST-SELECTION</code>.
+</dd>
+<dt><code>(:TAGS TEST-PACKAGE-DESIGNATOR [TAGS ... ])</code></dt><dd>Select all tests in
+     the designated package that match one or more of the tags in
+     <code>TAGS</code>.
+</dd>
+<dt><code>(:PACKAGE TEST-PACKAGE-DESIGNATOR)</code></dt><dd>Select all tests in the
+     designated package.
+</dd>
+<dt><code>(:PACKAGES [TEST-PACKAGE-DESIGNATORS ...])</code></dt><dd>Select all tests in
+     the specified packages.
+</dd>
+<dt><code>(:FILTER TEST-PACKAGE-DESIGNATOR FILTER)</code></dt><dd>Select all tests in
+     the designator package that match the specified filter. <code>FILTER</code>
+     is a valid filter expression used in the body of a
+     <code>DEFINE-TEST-FILTER</code> form.
+</dd>
+<dt><code>(:NAMES TEST-PACKAGE-DESIGNATOR [NAMES ...])</code></dt><dd>Select specific
+     tests from the test package designator.
+</dd>
+<dt><code>(SYMBOL [ARGS ...])</code></dt><dd>Invoke the test selection with the name
+     <code>SYMBOL</code>.
+</dd>
+<dt><code>(LAMBDA () &amp;body body)</code></dt><dd>Invoke the lambda form. The lambda form
+     must return a test container which contains the selected tests.
+</dd>
+</dl>
+
+
+<p>
+A selection expression can be compiled to a function object using the
+function <code>COMPILE-TEST-SELECTION</code>.
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">compile-test-selection</span> (expression))
+</pre>
+
+<p>
+The returned function object accepts no arguments.
+</p>
+<p>
+Associated with the function <code>COMPILE-TEST-SELECTION</code> are the
+following functions
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">expand-test-selection</span> (expression))
+(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">expand-test-selection-1</span> (expression))
+</pre>
+
+<p>
+The function <code>EXPAND-TEST-SELECTION</code> repeatedly calls
+<code>EXPAND-TEST-SELECTION-1</code> until the expression returned by
+<code>EXPAND-TEST-SELECTION-1</code> is a <code>LAMBDA</code> test selection expression.
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-8" class="outline-2">
+<h2 id="sec-8"><span class="section-number-2">8</span> Defining test filters</h2>
+<div class="outline-text-2" id="text-8">
+
+<p>Test filters are used by the <code>SELECT-TEST</code> function to filter tests in
+a container. The macro <code>DEFINE-TEST-FILTER</code> provides a language for
+composing filters.
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">defmacro</span> <span style="color: #2075c7;">define-test-filter</span> (name test-lambda-list <span style="color: #a57705;">&amp;body</span> body))
+</pre>
+
+<p>
+The symbol <code>NAME</code> specifies the name of the test filter,
+<code>TEST-LAMBDA-LIST</code> represents the arguments to the filter and <code>BODY</code>
+is an implicit progn which assembles a filter expression.
+</p>
+<p>
+A filter expression is one of the following:
+</p><dl>
+<dt><code>(:OR [SUB-FILTER-EXPRESSIONS ...])</code></dt><dd>Match at least one of the sub
+     filter expressions.
+</dd>
+<dt><code>(:AND [SUB-FILTER-EXPRESSIONS ...])</code></dt><dd>Match all of the sub filter
+     expressions.
+</dd>
+<dt><code>(:NOT SUB-FILTER-EXPRESSION)</code></dt><dd>Negate the match of the sub filter
+     expression.
+</dd>
+<dt><code>(:TAG TAG)</code></dt><dd>The test has the <code>TAG</code> as one of its tags.
+</dd>
+<dt><code>(:TAGS [TAGS ...])</code></dt><dd>The test has one more <code>TAGS</code> as one of its
+     tags.
+</dd>
+<dt><code>(:PACKAGE PACKAGE-DESIGNATOR)</code></dt><dd>The test is defined in the
+     package <code>PACKAGE-DESIGNATOR</code>.
+</dd>
+<dt><code>(SYMBOL &amp;rest arguments)</code></dt><dd>Invoke the test filter with the name
+     <code>SYMBOL</code>.
+</dd>
+<dt><code>(LAMBDA (var) &amp;body body)</code></dt><dd>Invoke the lambda form with the
+     test. The test matches if the lambda function returns
+     non-nil. <code>VAR</code> must be a symbol and will be bound to the test
+     being matched.
+</dd>
+</dl>
+
+
+<p>
+A filter expression can be compiled to a function object using the
+function <code>COMPILE-TEST-FILTER</code>. The returned function object accepts a
+single argument, an object representing a test.
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">compile-test-filter</span> (expression))
+</pre>
+
+
+<p>
+Associated with <code>COMPILE-TEST-FILTER</code> are the functions
+</p>
+
+
+<pre class="src src-lisp">(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">expand-test-filter</span> (expression))
+(<span style="color: #728a05;">defun</span> <span style="color: #2075c7;">expand-test-filter-1</span> (expression))
+</pre>
+
+<p>
+These functions are responsible for expanding the filter expression in
+to a <code>LAMBDA</code> filter expression. The function <code>EXPAND-TEST-FILTER</code>
+performs the expansion by repeatedly calling <code>EXPAND-TEST-FILTER-1</code>
+until the expression returned is a lambda filter expression.
+</p>
+</div>
+</div>
+</div>
+
+<div id="postamble">
+<p class="date">Date: 2014-07-15T11:49+1000</p>
+<p class="author">Author: Mark Cox</p>
+<p class="creator"><a href="http://orgmode.org">Org</a> version 7.9.3f with <a href="http://www.gnu.org/software/emacs/">Emacs</a> version 24</p>
+<a href="http://validator.w3.org/check?uri=referer">Validate XHTML 1.0</a>
+
+</div>
+</body>
+</html>
